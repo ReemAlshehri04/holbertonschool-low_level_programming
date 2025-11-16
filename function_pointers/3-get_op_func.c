@@ -3,7 +3,8 @@
 /**
 	* get_op_func - selects the correct function
 	* @s: operator passed
-	* Return: pointer to function or NUL*/
+	* Return: pointer to function or NUL
+	*/
 int (*get_op_func(char *s))(int, int)
 {
 op_t ops[] = {

@@ -44,7 +44,7 @@ return (a / b);
 	* @a: first int
 	* @b: second int
 	* Return: remainder
-        */
+*/
 int op_mod(int a, int b)
 {
 return (a % b);
