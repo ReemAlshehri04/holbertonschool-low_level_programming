@@ -1,8 +1,9 @@
 #include "3-calc.h"
-#include <string.h>
+#include <stddef.h>
 /**
- * get_op_func - selects correct function
- */
+	* get_op_func - selects the correct function
+	* @s: operator passed
+	* Return: pointer to function or NUL*/
 int (*get_op_func(char *s))(int, int)
 {
 op_t ops[] = {
@@ -16,7 +17,7 @@ op_t ops[] = {
 int i = 0;
 while (ops[i].op != NULL)
 {
-if (strcmp(ops[i].op, s) == 0)
+if (*(ops[i].op) == *s && s[1] == '\0')
 return (ops[i].f);
 i++;
 }
