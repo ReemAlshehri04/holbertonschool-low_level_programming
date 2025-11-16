@@ -2,33 +2,33 @@
 #include <stdio.h>
 #include <stdarg.h>
 /**
-	* print_char - prints a char
-	* @ap: argument list
-	*/
+ * print_char - prints a char
+ * @ap: argument list
+ */
 void print_char(va_list ap)
 {
 printf("%c", va_arg(ap, int));
 }
 /**
-	* print_int - prints an integer
-	* @ap: argument list
-	*/
+ * print_int - prints an integer
+ * @ap: argument list
+ */
 void print_int(va_list ap)
 {
 printf("%d", va_arg(ap, int));
 }
 /**
-	* print_float - prints a float
-	* @ap: argument list
-	*/
+ * print_float - prints a float
+ * @ap: argument list
+ */
 void print_float(va_list ap)
 {
 printf("%f", va_arg(ap, double));
 }
 /**
-	* print_string - prints a string
-	* @ap: argument list
-	*/
+ * print_string - prints a string
+ * @ap: argument list
+ */
 void print_string(va_list ap)
 {
 char *s;
@@ -38,23 +38,31 @@ s = "(nil)";
 printf("%s", s);
 }
 /**
-	* print_all - prints anything based on format
-	* @format: list of types of arguments
-	*
-	* Description: c = char, i = int, f = float, s = string.
-	* Any unknown specifier is ignored.
-	*/
+ * struct specifier - maps a type symbol to its printer function
+ * @t: the format type character (c, i, f, s)
+ * @f: pointer to a function that prints the corresponding type
+ *
+ * Description: This struct allows linking format specifiers with
+ * the correct printing function to handle variadic arguments.
+ */
+struct specifier
+{
+char t;
+void (*f)(va_list);
+};
+/**
+ * print_all - prints anything based on provided format
+ * @format: list of argument types
+ *
+ * Description: c = char, i = int, f = float, s = string.
+ * Unknown format characters are ignored.
+ */
 void print_all(const char * const format, ...)
 {
 va_list ap;
 int i = 0, j;
 char *sep = "";
-struct specifier
-{
-char t;
-void (*f)(va_list);
-}
-ops[] = {
+struct specifier ops[] = {
 {'c', print_char},
 {'i', print_int},
 {'f', print_float},
