@@ -3,13 +3,15 @@
 #include <stdarg.h>
 /**
 	* print_char - prints a char
+	* @ap: argument list
 	*/
 void print_char(va_list ap)
 {
 printf("%c", va_arg(ap, int));
 }
 /**
-	* print_int - prints an int
+	* print_int - prints an integer
+	* @ap: argument list
 	*/
 void print_int(va_list ap)
 {
@@ -17,6 +19,7 @@ printf("%d", va_arg(ap, int));
 }
 /**
 	* print_float - prints a float
+	* @ap: argument list
 	*/
 void print_float(va_list ap)
 {
@@ -24,27 +27,34 @@ printf("%f", va_arg(ap, double));
 }
 /**
 	* print_string - prints a string
+	* @ap: argument list
 	*/
 void print_string(va_list ap)
 {
-char *s = va_arg(ap, char *);
-if (!s)
+char *s;
+s = va_arg(ap, char *);
+if (s == NULL)
 s = "(nil)";
 printf("%s", s);
 }
 /**
-	* print_all - prints anything
+	* print_all - prints anything based on format
+	* @format: list of types of arguments
+	*
+	* Description: c = char, i = int, f = float, s = string.
+	* Any unknown specifier is ignored.
 	*/
 void print_all(const char * const format, ...)
 {
 va_list ap;
 int i = 0, j;
 char *sep = "";
-struct spec
+struct specifier
 {
 char t;
 void (*f)(va_list);
-} ops[] = {
+}
+ops[] = {
 {'c', print_char},
 {'i', print_int},
 {'f', print_float},
