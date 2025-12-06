@@ -43,6 +43,16 @@ close(fd);
 exit(98);
 }
 }
+/**
+ * check_write - checks for write errors
+ * @w: number of bytes written
+ * @file: name of the file
+ * @fd_from: source file descriptor (closed on error)
+ * @fd_to: destination file descriptor (closed on error)
+ *
+ * If writing fails, prints an error message to STDERR,
+ * closes both file descriptors, and exits with code 99.
+ */
 void check_write(ssize_t w, char *file, int fd_from, int fd_to)
 {
 if (w == -1)
@@ -79,6 +89,15 @@ while ((r = read(fd_from, buffer, 1024)) > 0)
 w = write(fd_to, buffer, r);
 check_write(w, av[2], fd_from, fd_to);
 }
+/**
+ * check_read - checks for read errors
+ * @r: number of bytes read
+ * @file: name of the file
+ * @fd: file descriptor to close on failure
+ *
+ * If reading fails (r == -1), prints an error message to STDERR,
+ * closes the file descriptor if open, and exits with code 98.
+ */
 check_read(r, av[1], fd_from);
 if (close(fd_from) == -1)
 {
