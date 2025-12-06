@@ -1,115 +1,75 @@
-#include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 /**
- * 3-cp.c
- *
- * This program copies the content of one file into another.
- *
- * Features:
- * - Takes two arguments: file_from and file_to.
- * - Reads data from file_from in chunks of 1024 bytes.
- * - Writes the data into file_to (creates/truncates as needed).
- *
- * Error Handling:
- * - Exit 97: wrong argument count → prints "Usage: cp file_from file_to".
- * - Exit 98: cannot read from file_from.
- * - Exit 99: cannot write to file_to.
- * - Exit 100: cannot close a file descriptor.
- *
- * Permissions:
- * - Created file_to has permissions rw-rw-r-- (0664).
- *
- * Notes:
- * - Uses dprintf to print error messages to STDERR.
- * - Uses open(), read(), write(), close() system calls.
- * - Ensures proper cleanup on error (closing file descriptors when needed).
- */
-/**
- * check_args - checks if the number of arguments is correct
- * @ac: argument count
- *
- * If the number of arguments is not 3, prints the usage message
- * to STDERR and exits with code 97.
- */
-void check_args(int ac)
+	* error_exit - Print an error message to STDERR and exit
+	* @code: exit code to use
+	* @msg: error message format string
+	* @arg: argument inserted in the message (file name or file descriptor)
+	*
+	* Description: This function prints an error message using dprintf
+	* to the POSIX standard error and exits the program with the given code.
+	* It is used to avoid repeating error-handling code.
+	*/
+void error_exit(int code, const char *msg, const char *arg)
 {
-if (ac != 3)
-{
-dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
-exit(97);
-}
+dprintf(STDERR_FILENO, msg, arg);
+exit(code);
 }
 /**
- * check_read - checks for read errors
- * @r: number of bytes read
- * @file: name of the file
- * @fd: file descriptor to close on failure
- */
-void check_read(ssize_t r, char *file, int fd)
-{
-if (r == -1)
-{
-dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", file);
-if (fd != -1)
-close(fd);
-exit(98);
-}
-}
-/**
- * check_write - checks for write errors
- * @w: number of bytes written
- * @file: name of the file
- * @fd_from: source file descriptor (closed on error)
- * If writing fails, prints an error message to STDERR,
- * closes both file descriptors, and exits with code 99.
- */
-void check_write(ssize_t w, char *file, int fd_from, int fd_to)
-{
-if (w == -1)
-{
-dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file);
-if (fd_from != -1)
-close(fd_from);
-if (fd_to != -1)
-close(fd_to);
-exit(99);
-}
-}
-int main(int ac, char **av)
+	* main - Entry point, copies content from one file into another
+	* @argc: number of arguments
+	* @argv: argument vector, should contain source and destination file names
+	*
+	* Return: 0 on success.
+	*
+	* Description:
+	* This program replicates the behavior of the cp command.
+	* It reads 1,024 bytes at a time from file_from and writes them into file_to.
+	* It handles all errors related to argument count, file opening, reading,
+	* writing, and closing, printing the required messages and exiting with
+	* the correct exit codes as specified in the project instructions.
+	*/
+int main(int argc, char *argv[])
 {
 int fd_from, fd_to;
 ssize_t r, w;
 char buffer[1024];
-check_args(ac);
-fd_from = open(av[1], O_RDONLY);
-if (fd_from == -1)
+if (argc != 3)
 {
-dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", av[1]);
-exit(98);
+dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+exit(97);
 }
-fd_to = open(av[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+fd_from = open(argv[1], O_RDONLY);
+if (fd_from == -1)
+error_exit(98, "Error: Can't read from file %s\n", argv[1]);
+fd_to = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
 if (fd_to == -1)
 {
-dprintf(STDERR_FILENO, "Error: Can't write to %s\n", av[2]);
 close(fd_from);
-exit(99);
+error_exit(99, "Error: Can't write to %s\n", argv[2]);
 }
 while ((r = read(fd_from, buffer, 1024)) > 0)
 {
 w = write(fd_to, buffer, r);
-check_write(w, av[2], fd_from, fd_to);
+if (w != r)
+{
+close(fd_from);
+close(fd_to);
+error_exit(99, "Error: Can't write to %s\n", argv[2]);
 }
-check_read(r, av[1], fd_from);
+}
+if (r == -1)
+{
+close(fd_from);
+close(fd_to);
+error_exit(98, "Error: Can't read from file %s\n", argv[1]);
+}
 if (close(fd_from) == -1)
-{
-dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_from);
-exit(100);
-}
+error_exit(100, "Error: Can't close fd %s\n", argv[1]);
 if (close(fd_to) == -1)
-{
-dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_to);
-exit(100);
-}
+error_exit(100, "Error: Can't close fd %s\n", argv[2]);
 return (0);
 }
